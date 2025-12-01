@@ -13,12 +13,17 @@ except ImportError:
     print("錯誤：找不到 searching_main.py 檔案。請確保兩個檔案在同一目錄下。")
     sys.exit(1)
 
+#毛玻璃特效
+try:
+    import pywintypes
+except ImportError:
+    pywintypes = None
 
 class ClientApp(tk.Tk):
     def __init__(self, file_path):
         super().__init__()
         self.title("廷好搜客戶資料管理系統 (Tkinter)")
-        self.geometry("1920x720")
+        self.geometry("1050x720")
 
         sv_ttk.set_theme("dark")
 
@@ -132,7 +137,11 @@ class ClientApp(tk.Tk):
         if not messagebox.askyesno("確認刪除", f"確定要刪除選取的 {len(selected_items)} 筆資料嗎？"):
             return
             
-        indices_to_delete = [int(self.tree.item(item, 'iid')) for item in selected_items]
+        try:
+            indices_to_delete = [int(item) for item in selected_items]
+        except ValueError:
+            messagebox.showerror("錯誤", "選取的資料行無效，請嘗試重啟程式。")
+            return
         
         try:
             n_deleted = self.db.delete_rows(indices_to_delete)
