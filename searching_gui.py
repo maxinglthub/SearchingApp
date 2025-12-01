@@ -17,8 +17,8 @@ except ImportError:
 class ClientApp(tk.Tk):
     def __init__(self, file_path):
         super().__init__()
-        self.title("客戶資料管理系統 (Tkinter)")
-        self.geometry("1000x700")
+        self.title("廷好搜客戶資料管理系統 (Tkinter)")
+        self.geometry("1920x720")
 
         sv_ttk.set_theme("dark")
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     
     if not os.path.exists(FILE_PATH):
         # 彈出檔案選擇器
-        print(f"預設檔案 '{FILE_PATH}' 不存在，將開啟檔案選擇器...")
+        print(f"請選擇檔案...")
         
         temp_root = tk.Tk()
         temp_root.withdraw() 
