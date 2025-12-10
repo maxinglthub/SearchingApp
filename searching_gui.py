@@ -49,7 +49,7 @@ class ClientApp(ctk.CTk):
     def __init__(self, file_path):
         super().__init__()
         self.title("Client Manager Pro")
-        self.geometry("1100x700") # 恢復成寬螢幕桌面大小
+        self.geometry("1580x700") # 視窗大小
         
         # 設定整體背景
         self.configure(fg_color=BG_COLOR)
