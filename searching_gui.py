@@ -117,7 +117,7 @@ class ClientApp(ctk.CTk):
 
     def create_main_area(self):
         """右側主要內容區"""
-        # 這裡用一個大 Frame 包住，留一點邊距，製造懸浮感
+        # 一個Frame
         self.main_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.main_frame.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
         self.main_frame.grid_columnconfigure(0, weight=1)
@@ -127,20 +127,20 @@ class ClientApp(ctk.CTk):
         self.status_label = ctk.CTkLabel(self.main_frame, text="All Clients", font=("Microsoft JhengHei UI", 24, "bold"), text_color=TEXT_WHITE)
         self.status_label.grid(row=0, column=0, sticky="w", pady=(0, 20))
 
-        # --- 表格區域 (macOS 風格：深灰底、白字、無格線) ---
+        # --- 表格區域 ---
         style = ttk.Style()
         style.theme_use("default")
         
-        # 設定 Treeview 樣式
+        # Treeview 樣式
         style.configure("Treeview", 
                         background=CARD_BG, 
                         foreground=TEXT_WHITE, 
                         fieldbackground=CARD_BG,
                         borderwidth=0,
-                        rowheight=40,  # 較寬的行高，增加現代感
+                        rowheight=40,  
                         font=FONT_MAIN)
         
-        # 選中時的顏色 (macOS 藍)
+        # 選中時的顏色
         style.map('Treeview', background=[('selected', BLUE)], foreground=[('selected', 'white')])
 
         # 表頭樣式
@@ -151,13 +151,13 @@ class ClientApp(ctk.CTk):
                         font=("Microsoft JhengHei UI", 12, "bold"))
         style.map("Treeview.Heading", background=[('active', BG_COLOR)])
 
-        # 建立表格容器 (為了圓角)
+        # 建立表格容器 (For圓角)
         table_container = ctk.CTkFrame(self.main_frame, fg_color=CARD_BG, corner_radius=15)
         table_container.grid(row=1, column=0, sticky="nsew")
         table_container.grid_columnconfigure(0, weight=1)
         table_container.grid_rowconfigure(0, weight=1)
 
-        # 滾動條 (使用 CTk 的比較美觀)
+        # 滾動條 (TCK)
         self.yscroll = ctk.CTkScrollbar(table_container, button_color="#555555")
         self.yscroll.grid(row=0, column=1, sticky="ns", padx=(0, 5), pady=5)
 
@@ -182,9 +182,9 @@ class ClientApp(ctk.CTk):
             else:
                 self.tree.column(col, width=120, anchor="center")
 
-        # 斑馬紋 (偶數行稍微深一點點，增加易讀性)
+        # 斑馬紋
         self.tree.tag_configure('odd', background=CARD_BG)
-        self.tree.tag_configure('even', background="#333336") # 稍深的顏色
+        self.tree.tag_configure('even', background="#333336")
 
         for index, row in df.iterrows():
             values = [row[col] for col in columns]
@@ -193,7 +193,7 @@ class ClientApp(ctk.CTk):
         
         self.count_label.configure(text=f"Total: {len(df)} 筆資料")
 
-    # --- 邏輯區 (與之前相同，但配合新介面微調) ---
+    # --- 邏輯區 ---
     def run_search(self):
         query = self.search_entry.get().strip()
         q_words = query.split()
