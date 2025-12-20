@@ -2,6 +2,10 @@ import pandas as pd
 import re
 import os
 from typing import List, Dict, Optional
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import base64
 
 # ---- 常用欄位別名（可自行擴充）----
 COLUMN_ALIASES: Dict[str, List[str]] = {
