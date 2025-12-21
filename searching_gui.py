@@ -5,6 +5,7 @@ import sys
 import os
 import webbrowser
 from PIL import Image, ImageTk
+import hashlib
 
 # 匯入資料核心
 try:
@@ -12,6 +13,8 @@ try:
 except ImportError:
     print("錯誤：找不到 searching_main.py 檔案。")
     sys.exit(1)
+
+psw_file = ""
 
 # 配色
 BG_COLOR = "#000000"

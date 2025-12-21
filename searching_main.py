@@ -16,6 +16,29 @@ COLUMN_ALIASES: Dict[str, List[str]] = {
     "備註": ["備註", "備考", "備註欄", "note", "Note", "remark", "Remark", "memo", "Memo", "comments"],
 }
 
+# ---- 加密/解密 ----
+class SecurityManager:
+    def __init__(self, psw: str):
+        self.psw = psw.encode()
+
+    def _derive_key(self, salt: bytes) -> bytes:
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+        )
+        return base64.urlsafe_b64encode(kdf.derive(self.psw))
+    
+    def encrypt_data(self, data: bytes) -> bytes:
+        """隨機生成16byte salt -> salt + psw = key -> encode -> return salt&data"""
+        salt = os.urandom[:16]
+        encrypted_content = data_with_salt[16:]
+        
+        key = self._derive_key(salt)
+        f = Ferent(key)
+        return f.encrypt(encrypted_content)
+
 def normalize_phone(s: str) -> str:
     """將字串中的非數字字符移除，用於電話比對。"""
     if pd.isna(s):
@@ -50,18 +73,38 @@ def read_any(path: str) -> pd.DataFrame:
         raise ValueError("只支援 .xlsx/.xls/.csv 檔案。")
 
 class ClientDB:
-    def __init__(self, path: str):
+    def __init__(self, path: str, psw:str):
         self.path = path
+        self.security = SecurityManager(password)
         self.df = read_any(path)
         self.colmap = build_column_map(self.df)
+
+        try:
+            self.df = self._load_encrypted_file()
+        except Exception as e:
+            try:
+                self.df = pd.read_excel(path, dtype=str).fillna("")
+            except:
+                raise ValueError("解密失敗或檔案格式錯誤")
         
-        # 建議的顯示欄位順序
+        self.colmap = build_column_map(self.df)
         self.display_cols: List[str] = []
         for std in ["客戶編號", "名字", "電話", "地址", "備註"]:
             if std in self.colmap:
                 self.display_cols.append(self.colmap[std])
         if not self.display_cols:
             self.display_cols = list(self.df.columns)
+
+    def _load_encrypted_file(self) -> pd.DataFrame:
+        if not os.path.exists(self.path):
+            return pd.DataFrame(columns=["客戶編號", "名字", "電話", "地址", "備註"])
+        
+        with open(self.path, "rb") as f:
+            file_content = f.read()
+
+        decrypted_data = self.security.decrypt_data(file_content)
+
+        return dp.read_excel(io.BytesIO(decrypted_data), dtype=str).fillna("")
 
     def search(self, q_words: List[str], columns: Optional[List[str]]=None, use_or:bool=False) -> pd.DataFrame:
         """執行模糊搜尋。"""
@@ -123,6 +166,15 @@ class ClientDB:
 
     def save(self, path: Optional[str]=None) -> str:
         """儲存 DataFrame 到指定路徑 (預設覆寫原檔)。"""
+        buffer = io.BytesIO()
+        self.df.to_csv(buffer, index=False, encoding="utf-8-sig")
+        excel_data = buffer.getvalue()
+
+        encrypted_data_with_salt = self.security.encrypt_data(excel_data)
+
+        with open(path or self.path, "wb") as f:
+            f.write(encrypted_data_with_salt)
+
         path = path or self.path
         ext = os.path.splitext(path)[1].lower()
         if ext == ".xlsx" or ext == ".xls":
